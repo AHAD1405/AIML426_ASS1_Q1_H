@@ -2,6 +2,7 @@ import random
 import numpy as np
 #from deap import base, creator, tools, algorithms
 import pandas
+import pandas as pd
 
 def create_dataset(file_name):
     """
@@ -127,7 +128,7 @@ def print_summary(best_values, best_weights, values_mean, weights_mean, values_s
         weights_std (float): The standard deviation of the weights of the best solutions.
     """
     # run sequence column
-    runs_column = list(range(1, len(best_values)+1))
+    runs_column = list(['Run '+ str(i) for i in range(1, len(best_values)+1)])
 
     # Create a dictionary with the two lists as values
     data = {'': runs_column, 'Total value': best_values, 'Total Wight': best_weights}
