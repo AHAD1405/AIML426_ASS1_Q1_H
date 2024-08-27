@@ -164,6 +164,17 @@ def main():
             #population = best_elitism_individuals + offspring_sorted[:len(population)-elitism_size]
             population = offspring_sorted
 
+            # Stop Crieteria: if hte best solution during this generation equal optimal value, then break the loop and go to next run 
+            if max(offspring_fitness) == optimal_value: 
+                break
+ 
+        # Find the best solution and store its (weight, value, and individual) each run
+        best_individual.append(max(population, key=lambda individual: fitness(individual, knapsack_items, max_capacity))) # returns the individual with the maximum fitness score from the final population.
+        best_value.append(fitness(best_individual[run], knapsack_items, max_capacity))
+        best_weight.append(sum([knapsack_items['weights'][i] * best_individual[run][i] for i in range(len(knapsack_items['weights']))]))
+
+    
+
 
 if __name__ == "__main__":
     main()   
