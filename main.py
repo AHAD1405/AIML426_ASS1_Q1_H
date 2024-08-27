@@ -115,7 +115,7 @@ def mutation(offspring, num_items, mutation_rate):
                 individual[mutation_point] = 1 - individual[mutation_point]
     return offspring
 
-def print_summary(best_values, best_weights, values_mean, weights_mean, values_std, weights_std):
+def print_summary(best_values, best_weights, values_mean, weights_mean, values_std, weights_std, dataset_file, optimal_value):
     """
     Print the summary of the results.
 
@@ -143,7 +143,7 @@ def print_summary(best_values, best_weights, values_mean, weights_mean, values_s
     # Create a new DataFrame with the stander deviation and concatenate it with (data_table)
     std_row = pd.DataFrame({'': ['STD'], 'Total value': values_std, 'Total Wight': weights_std})
     data_table = pd.concat([data_table, std_row], ignore_index=True)
-
+    print(f'Dataset: {dataset_file}, Optimal Value: {optimal_value}')
     print(data_table)
 
 def main():
@@ -158,61 +158,67 @@ def main():
     best_value = []
     elitism_size = 1
 
-    dataset_file = '10_269'
+    dataset_files = ['23_10000', '10_269','100_995']  
     
-    knapsack_items, max_capacity, num_items, optimal_value = create_dataset(dataset_file)  # Obtain dataset values into parameter
-    
-    for run in range(5):
-        random.seed(seed_[run])
+    for dataset_file in dataset_files:
+        knapsack_items, max_capacity, num_items, optimal_value = create_dataset(dataset_file)  # Obtain dataset values into parameter
         
-        # Initialize random individual. then add it to population 
-        population = []
-        for _ in range(population_size):
-            individual = [random.randint(0, 1) for _ in range(num_items)]  # It generates a random integer between 0 and 1 (inclusive)
-            population.append(individual)
+        # Reset the best_individual, best_weight, and best_value lists
+        best_individual = []
+        best_weight = []
+        best_value = []
 
-        # Genetic algorithm
-        for generation in range(num_generations):
-            # Evaluate fitness
-            fitness_scores = [fitness(individual, knapsack_items, max_capacity) for individual in population]
+        for run in range(5):
+            random.seed(seed_[run])
             
-            # apply elitism: select the top 1 individuals from the population
-            #elite_idx = np.argsort(fitness_scores)[::-1][:elitism_size]
-            #best_elitism_individuals = [population[i] for i in elite_idx]
+            # Initialize random individual. then add it to population 
+            population = []
+            for _ in range(population_size):
+                individual = [random.randint(0, 1) for _ in range(num_items)]  # It generates a random integer between 0 and 1 (inclusive)
+                population.append(individual)
 
-            # PARENT SELECTION: select parent using tournament selection
-            parent_individuals = []
-            parent = tournament_selection(population, fitness_scores, tournament_size)
-            [parent_individuals.append(individual) for individual in parent]
+            # Genetic algorithm
+            for generation in range(num_generations):
+                # Evaluate fitness
+                fitness_scores = [fitness(individual, knapsack_items, max_capacity) for individual in population]
+                
+                # apply elitism: select the top 1 individuals from the population
+                #elite_idx = np.argsort(fitness_scores)[::-1][:elitism_size]
+                #best_elitism_individuals = [population[i] for i in elite_idx]
 
-            # CROSSOVER
-            offspring = crossover(parent_individuals, num_items)
-            # MUTATION
-            offspring = mutation(offspring, num_items, mutation_rate)
-            
-            # REPRODUCTION: Create and evaluate population for next generation, It is used to select the fittest individuals for the next generation
-            offspring_fitness = [fitness(individual, knapsack_items, max_capacity) for individual in offspring]
-            offspring_sorted = [individual for individual, score in sorted(zip(offspring, offspring_fitness), key=lambda x: x[1], reverse=True)]
-            #population = best_elitism_individuals + offspring_sorted[:len(population)-elitism_size]
-            population = offspring_sorted
+                # PARENT SELECTION: select parent using tournament selection
+                parent_individuals = []
+                parent = tournament_selection(population, fitness_scores, tournament_size)
+                [parent_individuals.append(individual) for individual in parent]
 
-            # Stop Crieteria: if hte best solution during this generation equal optimal value, then break the loop and go to next run 
-            if max(offspring_fitness) == optimal_value: 
-                break
- 
-        # Find the best solution and store its (weight, value, and individual) each run
-        best_individual.append(max(population, key=lambda individual: fitness(individual, knapsack_items, max_capacity))) # returns the individual with the maximum fitness score from the final population.
-        best_value.append(fitness(best_individual[run], knapsack_items, max_capacity))
-        best_weight.append(sum([knapsack_items['weights'][i] * best_individual[run][i] for i in range(len(knapsack_items['weights']))]))
+                # CROSSOVER
+                offspring = crossover(parent_individuals, num_items)
+                # MUTATION
+                offspring = mutation(offspring, num_items, mutation_rate)
+                
+                # REPRODUCTION: Create and evaluate population for next generation, It is used to select the fittest individuals for the next generation
+                offspring_fitness = [fitness(individual, knapsack_items, max_capacity) for individual in offspring]
+                offspring_sorted = [individual for individual, score in sorted(zip(offspring, offspring_fitness), key=lambda x: x[1], reverse=True)]
+                #population = best_elitism_individuals + offspring_sorted[:len(population)-elitism_size]
+                population = offspring_sorted
 
-    # Calulate Mean and Std for value and weights
-    mean_value = round(np.mean(best_value), 2)
-    mean_wight = round(np.mean(best_weight))
-    std_value = round(np.std(best_value))
-    std_wight = round(np.std(best_weight))
+                # Stop Crieteria: if hte best solution during this generation equal optimal value, then break the loop and go to next run 
+                if max(offspring_fitness) == optimal_value: 
+                    break
     
-    # PrintTable 
-    print_summary(best_value, best_weight, mean_value, mean_wight, std_value, std_wight)
+            # Find the best solution and store its (weight, value, and individual) each run
+            best_individual.append(max(population, key=lambda individual: fitness(individual, knapsack_items, max_capacity))) # returns the individual with the maximum fitness score from the final population.
+            best_value.append(fitness(best_individual[run], knapsack_items, max_capacity))
+            best_weight.append(sum([knapsack_items['weights'][i] * best_individual[run][i] for i in range(len(knapsack_items['weights']))]))
+
+        # Calulate Mean and Std for value and weights
+        mean_value = round(np.mean(best_value), 2)
+        mean_wight = round(np.mean(best_weight))
+        std_value = round(np.std(best_value))
+        std_wight = round(np.std(best_weight))
+        
+        # PrintTable 
+        print_summary(best_value, best_weight, mean_value, mean_wight, std_value, std_wight, dataset_file, optimal_value)
 
 
 if __name__ == "__main__":
