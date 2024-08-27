@@ -40,7 +40,7 @@ def create_dataset(file_name):
         
         # Find the vlaue of optimal_value paramener. depend on value of (max_capacity) 
         if max_capacity == 269: optimal_value = 295
-        elif max_capacity == 1000: optimal_value = 9767
+        elif max_capacity == 10000: optimal_value = 9767
         else: optimal_value = 1514
         
         item_dict = {"weights":weights ,"values":values}
