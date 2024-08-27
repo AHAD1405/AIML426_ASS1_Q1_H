@@ -114,6 +114,37 @@ def mutation(offspring, num_items, mutation_rate):
                 individual[mutation_point] = 1 - individual[mutation_point]
     return offspring
 
+def print_summary(best_values, best_weights, values_mean, weights_mean, values_std, weights_std):
+    """
+    Print the summary of the results.
+
+    Args:
+        best_values (list): A list containing the best values obtained in each run.
+        best_weights (list): A list containing the weights of the best solutions obtained in each run.
+        values_mean (float): The mean of the best values.
+        weights_mean (float): The mean of the weights of the best solutions.
+        values_std (float): The standard deviation of the best values.
+        weights_std (float): The standard deviation of the weights of the best solutions.
+    """
+    # run sequence column
+    runs_column = list(range(1, len(best_values)+1))
+
+    # Create a dictionary with the two lists as values
+    data = {'': runs_column, 'Total value': best_values, 'Total Wight': best_weights}
+
+    # Create a pandas DataFrame from the dictionary
+    data_table = pd.DataFrame(data)
+
+    # Create a new DataFrame with the mean and concatenate it with (data_table)
+    mean_row = pd.DataFrame({'': ['Mean'], 'Total value': values_mean, 'Total Wight': weights_mean})
+    data_table = pd.concat([data_table, mean_row], ignore_index=True)
+
+    # Create a new DataFrame with the stander deviation and concatenate it with (data_table)
+    std_row = pd.DataFrame({'': ['STD'], 'Total value': values_std, 'Total Wight': weights_std})
+    data_table = pd.concat([data_table, std_row], ignore_index=True)
+
+    print(data_table)
+
 def main():
     population_size = 50   # Population size 
     num_generations  = 50   # number of generations to run the Genetic Algorithm
@@ -173,7 +204,14 @@ def main():
         best_value.append(fitness(best_individual[run], knapsack_items, max_capacity))
         best_weight.append(sum([knapsack_items['weights'][i] * best_individual[run][i] for i in range(len(knapsack_items['weights']))]))
 
+    # Calulate Mean and Std for value and weights
+    mean_value = round(np.mean(best_value), 2)
+    mean_wight = round(np.mean(best_weight))
+    std_value = round(np.std(best_value))
+    std_wight = round(np.std(best_weight))
     
+    # PrintTable 
+    print_summary(best_value, best_weight, mean_value, mean_wight, std_value, std_wight)
 
 
 if __name__ == "__main__":
