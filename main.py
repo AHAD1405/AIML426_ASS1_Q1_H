@@ -3,6 +3,7 @@ import numpy as np
 #from deap import base, creator, tools, algorithms
 import pandas
 import pandas as pd
+import os
 
 def create_dataset(file_name):
     """
@@ -26,7 +27,12 @@ def create_dataset(file_name):
     item_count = 0     # number of the items for each individual
     optimal_value = 0  
 
-    with open(file_name,'r') as file: 
+    # Read file and extract data file
+    full_path = os.path.abspath(__file__) # Get the full path of the script     
+    script_directory = os.path.dirname(full_path) # Get the directory of the script
+    data_file = os.path.join(script_directory,file_name) # Get the full path of the data file
+
+    with open(data_file,'r') as file: 
         data = file.readlines()      
 
         for idx, line in enumerate(data): # extract weights and vlues and store it into list
